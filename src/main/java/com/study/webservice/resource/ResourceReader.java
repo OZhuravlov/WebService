@@ -7,7 +7,6 @@ import java.util.regex.Pattern;
 
 public class ResourceReader {
 
-    private static final Pattern PATTERN = Pattern.compile("([^\\?]+)\\??(.*)");
     private static final String DEFAULT_FILE = "index.html";
     private String webAppPath;
 
@@ -16,19 +15,24 @@ public class ResourceReader {
     }
 
     public InputStream readContent(String uri) {
-        if (uri == null){
+        try {
+            File file = getFile(uri);
+            return new FileInputStream(file);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+            throw new NotFoundException("Can't read file", e);
+        }
+    }
+
+    File getFile(String uri) {
+        if (uri == null) {
             uri = DEFAULT_FILE;
         }
-        try {
-            File file = new File(webAppPath, uri);
-            if (!file.exists() || !file.isFile()) {
-                throw new NotFoundException("File not found");
-            }
-            return new FileInputStream(file);
-        } catch (IOException e) {
-            e.printStackTrace();
-            throw new NotFoundException("File " + uri + " is not found", e);
+        File file = new File(webAppPath, uri);
+        if (!file.exists() || !file.isFile()) {
+            throw new NotFoundException("File not found");
         }
+        return file;
     }
 
 }

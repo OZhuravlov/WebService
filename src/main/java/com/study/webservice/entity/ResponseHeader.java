@@ -6,15 +6,13 @@ import java.time.format.DateTimeFormatter;
 
 public class ResponseHeader {
 
-    private String httpMessage;
-    private int httpCode;
+    private StatusCode httpStatus;
     private ZonedDateTime dateTime;
     private String contentType;
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.RFC_1123_DATE_TIME;
 
-    public ResponseHeader(int httpCode, String httpMessage) {
-        this.httpCode = httpCode;
-        this.httpMessage = httpMessage;
+    public void setHttpStatus(StatusCode httpStatus) {
+        this.httpStatus = httpStatus;
     }
 
     public void setDateTime() {
@@ -25,12 +23,11 @@ public class ResponseHeader {
         this.contentType = contentType;
     }
 
+
     @Override
     public String toString() {
-        StringBuilder stringBuilder = new StringBuilder("HTTP/1.1 ");
-        stringBuilder.append(httpCode);
-        stringBuilder.append(" ");
-        stringBuilder.append(httpMessage);
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append(httpStatus.generateResponseLine());
         stringBuilder.append("\nDate: ");
         stringBuilder.append(dateTime.format(FORMATTER));
         stringBuilder.append("\nServer: WebServer\nLast-Modified: ");

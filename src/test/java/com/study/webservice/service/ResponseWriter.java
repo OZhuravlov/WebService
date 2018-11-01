@@ -1,26 +1,24 @@
 package com.study.webservice.service;
 
 import com.study.webservice.entity.ResponseHeader;
+import com.study.webservice.entity.StatusCode;
 
 import java.io.*;
 
 public class ResponseWriter {
 
-    public final static ResponseHeader SUCCESS_RESPONSE = new ResponseHeader(200, "OK");
-    public final static ResponseHeader NOT_FOUND_RESPONSE = new ResponseHeader(404, "Not Found");
-    public final static ResponseHeader BAD_REQUEST = new ResponseHeader(400, "Bad Request");
-    public final static ResponseHeader INTERNAL_SERVER_ERROR = new ResponseHeader(500, "Internal Server Error");
-
     private OutputStream socketWriter;
+    private ResponseHeader responseHeader = new ResponseHeader();
 
     public ResponseWriter(OutputStream socketWriter) {
         this.socketWriter = socketWriter;
     }
 
-    public void send(ResponseHeader response, InputStream inputStream, String contentType) {
-        response.setContentType(contentType);
+    public void send(StatusCode statusCode, InputStream inputStream, String contentType) {
+        responseHeader.setHttpStatus(statusCode);
+        responseHeader.setContentType(contentType);
         try {
-            writeHeader(response);
+            writeHeader();
             byte[] buffer = new byte[1024];
             int count;
             while((count = inputStream.read(buffer)) != -1){
@@ -29,23 +27,24 @@ public class ResponseWriter {
             socketWriter.flush();
         } catch (IOException e) {
             e.printStackTrace();
-            throw new RuntimeException("Can't write response", e);
+            throw new RuntimeException("Can't write responseHeader", e);
         }
     }
 
-    public void send(ResponseHeader response) {
+    public void send(StatusCode statusCode) {
+        responseHeader.setHttpStatus(statusCode);
         try {
-            writeHeader(response);
+            writeHeader();
             socketWriter.flush();
         } catch (IOException e) {
             e.printStackTrace();
-            throw new RuntimeException("Can't write response", e);
+            throw new RuntimeException("Can't write responseHeader", e);
         }
     }
 
-    private void writeHeader(ResponseHeader response) throws IOException {
-        response.setDateTime();
-        socketWriter.write(response.toString().getBytes());
+    private void writeHeader() throws IOException {
+        responseHeader.setDateTime();
+        socketWriter.write(responseHeader.toString().getBytes());
     }
 
 }
